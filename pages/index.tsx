@@ -7,10 +7,20 @@ import Header from "../components/Header";
 import youtube from "../apis/youtube";
 import styles from "../styles/Home.module.css";
 import axios from "axios";
+import { getDuration } from "../utils";
+import { useMoralis } from "react-moralis";
 
 const Home: NextPage = () => {
   const [query, setQuery] = useState("");
   const [videos, setVideos] = useState([]);
+  const {
+    authenticate,
+    isAuthenticated,
+    isAuthenticating,
+    user,
+    account,
+    logout,
+  } = useMoralis();
 
   const handleSubmit = async (e: any) => {
     if (e.key == "Enter") {
@@ -22,9 +32,8 @@ const Home: NextPage = () => {
         },
       });
       let output = [...response.data.items];
-      console.log(e.target.value);
-      console.log(response);
-      response.data.items.map(async (vid: any, index: Number) => {
+      console.log(output);
+      for (const [index, vid] of output.entries()) {
         const stats = await axios.get(
           "https://www.googleapis.com/youtube/v3/videos",
           {
@@ -35,17 +44,42 @@ const Home: NextPage = () => {
             },
           }
         );
-        console.log(stats);
+        const durationDetails = await axios.get(
+          "https://www.googleapis.com/youtube/v3/videos",
+          {
+            params: {
+              part: "contentDetails",
+              id: vid.id.videoId,
+              key: process.env.NEXT_PUBLIC_REACT_APP_KEY,
+            },
+          }
+        );
+        console.log(durationDetails);
+        console.log(output[index]);
+        output[index]["duration"] = getDuration(
+          durationDetails.data.items[0].contentDetails.duration
+        );
         output[index]["stats"] = stats.data.items[0].statistics;
-      });
+      }
       setVideos(output);
       console.log(output);
     }
   };
   return (
     <div>
-      <Header handleSubmit={handleSubmit} />
-      <Body query={query} videos={videos} />
+      <Header
+        handleSubmit={handleSubmit}
+        authenticate={authenticate}
+        isAuthenticated={isAuthenticated}
+        user={user}
+        account={account}
+      />
+      <Body
+        query={query}
+        videos={videos}
+        isAuthenticated={isAuthenticated}
+        authenticate={authenticate}
+      />
     </div>
   );
 };

@@ -1,14 +1,19 @@
 import React from "react";
 
-const Body = (props: { query: string; videos: Array<[]> }) => {
+const Body = (props: {
+  query: string;
+  videos: Array<[]>;
+  isAuthenticated: boolean;
+  authenticate: Function;
+}) => {
   console.log(props.videos[0]);
 
-  const abbreviateNumber = (value) => {
+  const abbreviateNumber = (value: Number) => {
     var newValue = value;
     if (value >= 1000) {
-      var suffixes = ["", "k", "m", "b", "t"];
+      var suffixes = ["", "K", "M", "B", "T"];
       var suffixNum = Math.floor(("" + value).length / 3);
-      var shortValue = "";
+      var shortValue = null;
       for (var precision = 2; precision >= 1; precision--) {
         shortValue = parseFloat(
           (suffixNum != 0
@@ -30,33 +35,76 @@ const Body = (props: { query: string; videos: Array<[]> }) => {
     return newValue;
   };
 
+  const calculateSol = (vid: any) => {
+    console.log(vid.duration);
+    return (
+      vid.duration.seconds * 0.0001 +
+      vid.duration.minutes * 0.001 +
+      vid.duration.hours * 0.01
+    );
+  };
+
   return (
     <>
-      {props.videos ? (
+      {!props.isAuthenticated ? (
+        <div className="h-full relative p-8 text-center border border-gray-200 rounded-lg">
+          <h2 className="text-2xl font-medium">No connected wallet</h2>
+
+          <p className="mt-4 text-sm text-gray-500">
+            Connect your solana wallet to access the plateform
+          </p>
+
+          <button
+            onClick={() =>
+              props.authenticate({ type: "sol" }).catch(function (error: any) {
+                console.log(error);
+              })
+            }
+            className="inline-flex items-center px-5 py-3 mt-8 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-500"
+          >
+            Connect Wallet
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              className="flex-shrink-0 w-4 h-4 ml-3"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              />
+            </svg>
+          </button>
+        </div>
+      ) : props.videos ? (
         <div className="grid grid-cols-3 gap-6 pt-16 px-32 place-content-center">
           {props.videos.map((video: any) => (
-            <>
-              <div
-                key={video.etag}
-                className="each mb-10 m-2 shadow-lg border-gray-800 bg-gray-100 relative"
-              >
+            <div key={video.etag}>
+              <div className="each mb-10 m-2 shadow-lg border-gray-800 bg-gray-100 relative">
                 <img
                   className="w-full"
                   src={video.snippet.thumbnails.medium.url}
                   alt=""
                 />
                 <div className="badge absolute top-0 right-0 bg-indigo-500 m-1 text-gray-200 p-1 px-2 text-xs font-bold rounded">
-                  3 $SOL
+                  {`${calculateSol(video)} $SOL`}
                 </div>
                 <div className="info-box text-xs flex p-1 font-semibold text-gray-500 bg-gray-300">
-                  <span className="mr-1 p-1 px-2 font-bold">10:53 min</span>
-                  <span className="mr-1 p-1 px-2 font-bold border-l border-gray-400">
-                    {/* {`${abbreviateNumber(Number(video.stats.viewCount))} Views`} */}
-                    1.1k Views
+                  <span className="mr-1 p-1 px-2 font-bold">
+                    {video.snippet.liveBroadcastContent == "live"
+                      ? "🔴 Live"
+                      : video.duration.string}
                   </span>
                   <span className="mr-1 p-1 px-2 font-bold border-l border-gray-400">
-                    {/* {`${abbreviateNumber(Number(video.stats.likeCount))} Likes`} */}
-                    105 Likes
+                    {`${abbreviateNumber(Number(video.stats.viewCount))} Views`}
+                    {/* 1.1k Views */}
+                  </span>
+                  <span className="mr-1 p-1 px-2 font-bold border-l border-gray-400">
+                    {`${abbreviateNumber(Number(video.stats.likeCount))} Likes`}
+                    {/* 105 Likes */}
                   </span>
                 </div>
                 <div className="desc p-4 text-gray-800">
@@ -79,7 +127,7 @@ const Body = (props: { query: string; videos: Array<[]> }) => {
                   </span>
                 </div>
               </div>
-            </>
+            </div>
           ))}
         </div>
       ) : (
