@@ -1,11 +1,6 @@
 import React, { useRef, useState } from "react";
 
 // components
-
-import CardLineChart from "../components/Cards/CardLineChart";
-import CardBarChart from "../components/Cards/CardBarChart";
-import CardPageVisits from "../components/Cards/CardPageVisits";
-import CardSocialTraffic from "../components/Cards/CardSocialTraffic";
 import Header from "../components/Header";
 import { useMoralis } from "react-moralis";
 import { useRouter } from "next/router";
