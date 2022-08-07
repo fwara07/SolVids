@@ -21,6 +21,15 @@ export async function getServerSideProps(context: any) {
       },
     }
   );
+
+  if (durationDetails.data.items.length == 0) {
+    return {
+      props: {
+        duration: null,
+        id: id,
+      },
+    };
+  }
   return {
     props: {
       duration: getDuration(
@@ -35,9 +44,16 @@ export async function getServerSideProps(context: any) {
 const VideoComponenet = (props) => {
   const [elapsed, setElapsed] = useState({ percent: "0%", sol: "0" });
   const playerRef = useRef();
-  const { authenticate, isAuthenticated, user, account } = useMoralis();
+  const { authenticate, isAuthenticated, user, account, isWeb3EnableLoading } =
+    useMoralis();
+  const router = useRouter();
 
   useEffect(() => {
+    if (props.duration == null) {
+      router.push("/");
+    } else if (!isAuthenticated) {
+      router.push("/");
+    }
     const interval = setInterval(async () => {
       console.log(playerRef);
       const elapsed_sec =
@@ -119,6 +135,7 @@ const VideoComponenet = (props) => {
       <Header
         handleSubmit={handleSubmit}
         authenticate={authenticate}
+        loading={isWeb3EnableLoading}
         isVideo
         isAuthenticated={isAuthenticated}
         user={user}

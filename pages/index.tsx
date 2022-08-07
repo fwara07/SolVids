@@ -19,6 +19,7 @@ const Home: NextPage = () => {
     isAuthenticating,
     user,
     account,
+    isWeb3EnableLoading,
     logout,
   } = useMoralis();
 
@@ -70,6 +71,7 @@ const Home: NextPage = () => {
       <Header
         handleSubmit={handleSubmit}
         authenticate={authenticate}
+        loading={isWeb3EnableLoading}
         isAuthenticated={isAuthenticated}
         user={user}
         account={account}
@@ -77,6 +79,7 @@ const Home: NextPage = () => {
       <Body
         query={query}
         videos={videos}
+        loading={isWeb3EnableLoading}
         isAuthenticated={isAuthenticated}
         authenticate={authenticate}
       />
